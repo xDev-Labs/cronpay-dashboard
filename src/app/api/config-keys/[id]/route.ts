@@ -32,12 +32,12 @@ export async function PUT(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
   if (!session?.user?.email)
     return new Response("Unauthorized", { status: 401 });
-  const { id } = params;
+  const { id } = await context.params;
 
   const supabase = supabaseServer();
 
