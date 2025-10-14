@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/header";
 import { KeyDialog } from "@/components/key-dialog";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { mockConfigKeys, ConfigKey } from "@/lib/mock-data";
-import { generateApiKey, maskApiKey, maskAddress } from "@/lib/generate-api-key";
+import { CHAIN_OPTIONS, ConfigKey } from "@/types";
+import {
+  generateApiKey,
+  maskApiKey,
+  maskAddress,
+} from "@/lib/generate-api-key";
 import { Edit, Trash2, Plus, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,37 +31,110 @@ interface KeysPageClientProps {
 }
 
 export function KeysPageClient({ user }: KeysPageClientProps) {
-  const [keys, setKeys] = useState<ConfigKey[]>(mockConfigKeys);
+  const [keys, setKeys] = useState<ConfigKey[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingKey, setEditingKey] = useState<ConfigKey | undefined>();
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
 
-  const handleCreateKey = (newKey: Omit<ConfigKey, "id" | "createdAt">) => {
-    const key: ConfigKey = {
-      ...newKey,
-      apiKey: generateApiKey(), // Generate API key for new keys
-      id: Date.now().toString(),
-      createdAt: new Date(),
+  const chainNameToId = useMemo(() => {
+    const map = new Map<string, number>();
+    CHAIN_OPTIONS.forEach((option) => map.set(option.name, option.id));
+    return map;
+  }, []);
+
+  const chainIdToName = (id: number) => {
+    const option = CHAIN_OPTIONS.find((opt) => opt.id === id);
+    return option?.name ?? String(id);
+  };
+
+  useEffect(() => {
+    const loadKeys = async () => {
+      try {
+        const res = await fetch("/api/config-keys", { cache: "no-store" });
+        if (!res.ok) throw new Error(await res.text());
+        const json = await res.json();
+        const loaded: ConfigKey[] = (json.keys || []).map((k: any) => ({
+          id: k.id,
+          chain: chainIdToName(k.chain),
+          token: k.token,
+          address: k.receiver_address,
+          apiKey: k.id,
+          createdAt: new Date(k.created_at),
+        }));
+        setKeys(loaded);
+      } catch (e) {
+        // fallback to empty on error; toast can be added if needed
+        setKeys([]);
+      }
     };
-    setKeys([...keys, key]);
+    loadKeys();
+  }, []); // load once on mount
+
+  const handleCreateKey = async (newKey: Omit<ConfigKey, "createdAt">) => {
+    const payload = {
+      id: newKey.id,
+      chain: chainNameToId.get(newKey.chain) ?? 0,
+      token: newKey.token,
+      receiver_address: newKey.address,
+    };
+    try {
+      const res = await fetch("/api/config-keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const key: ConfigKey = {
+        id: newKey.id,
+        chain: newKey.chain,
+        token: newKey.token,
+        address: newKey.address,
+        apiKey: newKey.id,
+        createdAt: new Date(),
+      };
+      setKeys((prev) => [key, ...prev]);
+      toast.success("Config key created");
+    } catch (err: any) {
+      toast.error("Failed to create key");
+    }
   };
 
-  const handleEditKey = (updatedKey: Omit<ConfigKey, "id" | "createdAt">) => {
+  const handleEditKey = async (updatedKey: Omit<ConfigKey, "createdAt">) => {
     if (!editingKey) return;
-
-    setKeys(
-      keys.map((key) =>
-        key.id === editingKey.id
-          ? { ...key, ...updatedKey }
-          : key
-      )
-    );
-    setEditingKey(undefined);
+    const payload = {
+      chain: chainNameToId.get(updatedKey.chain) ?? 0,
+      token: updatedKey.token,
+      receiver_address: updatedKey.address,
+    };
+    try {
+      const res = await fetch(`/api/config-keys/${editingKey.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      setKeys((prev) =>
+        prev.map((key) =>
+          key.id === editingKey.id ? { ...key, ...updatedKey } : key
+        )
+      );
+      toast.success("Config key updated");
+    } catch (err: any) {
+      toast.error("Failed to update key");
+    } finally {
+      setEditingKey(undefined);
+    }
   };
 
-  const handleDeleteKey = (id: string) => {
-    if (confirm("Are you sure you want to delete this config key?")) {
-      setKeys(keys.filter((key) => key.id !== id));
+  const handleDeleteKey = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this config key?")) return;
+    try {
+      const res = await fetch(`/api/config-keys/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(await res.text());
+      setKeys((prev) => prev.filter((key) => key.id !== id));
+      toast.success("Config key deleted");
+    } catch (err: any) {
+      toast.error("Failed to delete key");
     }
   };
 
@@ -115,7 +192,10 @@ export function KeysPageClient({ user }: KeysPageClientProps) {
               <TableBody>
                 {keys.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                    <TableCell
+                      colSpan={6}
+                      className="text-center text-muted-foreground py-8"
+                    >
                       No config keys yet. Create one to get started!
                     </TableCell>
                   </TableRow>
