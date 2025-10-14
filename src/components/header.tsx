@@ -29,6 +29,7 @@ export function Header({ user }: HeaderProps) {
   const navItems = [
     { href: "/", label: "Dashboard" },
     { href: "/keys", label: "Keys" },
+    { href: "/statements", label: "Account Statement" },
   ];
 
   const handleSignOut = async () => {
@@ -51,10 +52,11 @@ export function Header({ user }: HeaderProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${pathname === item.href
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  pathname === item.href
                     ? "text-foreground"
                     : "text-muted-foreground"
-                  }`}
+                }`}
               >
                 {item.label}
               </Link>
@@ -88,7 +90,10 @@ export function Header({ user }: HeaderProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              className="cursor-pointer"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>
