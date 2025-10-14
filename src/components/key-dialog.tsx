@@ -19,12 +19,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { CHAIN_OPTIONS, TOKEN_OPTIONS, ConfigKey } from "@/lib/mock-data";
+import { CHAIN_OPTIONS, TOKEN_OPTIONS, ConfigKey } from "@/types";
+import { generateApiKey } from "@/lib/generate-api-key";
 
 interface KeyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (key: Omit<ConfigKey, "id" | "createdAt">) => void;
+  onSave: (key: Omit<ConfigKey, "createdAt">) => void;
   editKey?: ConfigKey;
 }
 
@@ -60,13 +61,15 @@ export function KeyDialog({
       return;
     }
 
-    // When editing, preserve the existing apiKey
-    // When creating, the parent component will generate it
+    // Generate ID for new keys, use existing for edits
+    const keyId = editKey?.id || generateApiKey();
+
     onSave({
+      id: keyId,
       chain,
       token,
       address,
-      apiKey: editKey?.apiKey || "", // Will be replaced by parent for new keys
+      apiKey: keyId,
     });
 
     // Reset form
@@ -99,8 +102,8 @@ export function KeyDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {CHAIN_OPTIONS.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
+                    <SelectItem key={option.name} value={option.name}>
+                      {option.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
