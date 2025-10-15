@@ -28,7 +28,7 @@ export function Header({ user }: HeaderProps) {
 
   const navItems = [
     { href: "/", label: "Dashboard" },
-    { href: "/keys", label: "Keys" },
+    { href: "/keys", label: "API Keys" },
     { href: "/statements", label: "Account Statement" },
     { href: "/docs", label: "Docs" },
   ];

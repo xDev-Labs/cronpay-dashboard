@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Transaction } from "@/types";
-import { FileText, FileSpreadsheet, Calendar } from "lucide-react";
+import { FileText, FileSpreadsheet, Calendar, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { getChainNameFromId, maskTxHash } from "@/lib/generate-api-key";
 
@@ -46,6 +46,7 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("30days");
   const [loading, setLoading] = useState(false);
+  const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
 
   const loadTransactions = async (period: TimePeriod) => {
     setLoading(true);
@@ -82,20 +83,27 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
       "Token",
       "Chain",
       "Status",
-      "Transaction Hash",
+      "Transaction ID",
+      "Explorer URL",
     ];
 
     const csvContent = [
       headers.join(","),
       ...transactions.map((tx) =>
         [
-          new Date(tx.created_at).toLocaleDateString(),
+          new Date(tx.created_at).toLocaleDateString() +
+            " " +
+            new Date(tx.created_at).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
           tx.amount,
           tx.currency,
           tx.config_keys?.token || "",
-          tx.config_keys?.chain || "",
+          getChainNameFromId(Number(tx.config_keys?.chain)),
           tx.status,
-          tx.transaction_hash || "",
+          tx.intent_id || "",
+          `https://explorer.nexus-folly.availproject.org/intent/${tx.intent_id}`,
         ].join(",")
       ),
     ].join("\n");
@@ -159,7 +167,20 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
   const getPeriodLabel = (period: TimePeriod) => {
     return TIME_PERIODS.find((p) => p.value === period)?.label || period;
   };
+  const handleCopyTxHash = async (txHash: string, keyId: string) => {
+    try {
+      await navigator.clipboard.writeText(txHash);
+      setCopiedKeyId(keyId);
+      toast.success("Transaction hash copied to clipboard!");
 
+      // Reset copied state after 2 seconds
+      setTimeout(() => {
+        setCopiedKeyId(null);
+      }, 2000);
+    } catch (_err) {
+      toast.error("Failed to copy transaction hash");
+    }
+  };
   return (
     <div className="min-h-screen bg-background">
       <Header user={user} />
@@ -285,7 +306,37 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
                         </span>
                       </TableCell>
                       <TableCell className="font-mono text-sm">
-                        {maskTxHash(transaction.transaction_hash || "-")}
+                        {transaction.intent_id ? (
+                          <a
+                            href={`https://explorer.nexus-folly.availproject.org/intent/${transaction.intent_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline text-blue-600 hover:text-blue-800"
+                          >
+                            {maskTxHash(
+                              transaction.intent_id?.toString() || "-"
+                            )}
+                          </a>
+                        ) : (
+                          maskTxHash(transaction.intent_id?.toString() || "-")
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() =>
+                            handleCopyTxHash(
+                              transaction.intent_id?.toString() || "",
+                              transaction.id
+                            )
+                          }
+                        >
+                          {copiedKeyId === transaction.id ? (
+                            <Check className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

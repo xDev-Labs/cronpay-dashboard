@@ -19,7 +19,7 @@ export async function GET() {
   const { data: transactions, error } = await supabase
     .from("transactions")
     .select(
-      "id, amount, currency, token_received_amount, status, transaction_hash, created_at, config_keys(id, chain, token)"
+      "id, amount, currency, token_received_amount, status, transaction_hash, intent_id, created_at, config_keys(id, chain, token)"
     )
     .in(
       "config_key_id",

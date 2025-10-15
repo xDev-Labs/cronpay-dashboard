@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { jsPDF } from "jspdf";
 import autoTable, { CellHookData } from "jspdf-autotable";
 import { maskTxHash } from "@/lib/generate-api-key";
+import { Transaction } from "@/types";
 
 type TimePeriod = "today" | "7days" | "30days" | "6months" | "1year";
 
@@ -9,21 +10,6 @@ interface jsPDFWithAutoTable extends jsPDF {
   lastAutoTable: {
     finalY: number;
   };
-}
-
-interface Transaction {
-  id: string;
-  amount: string;
-  currency: string;
-  token_received_amount: string | null;
-  status: "completed" | "pending" | "failed";
-  transaction_hash: string | null;
-  created_at: string;
-  config_keys?: {
-    id: string;
-    chain: string | number;
-    token: string;
-  } | null;
 }
 
 function getPeriodLabel(period: TimePeriod): string {
@@ -129,7 +115,7 @@ export async function POST(request: NextRequest) {
     // Summary table - linear layout
     const summaryData = [
       [
-        `Total Amount: ${totalAmount.toFixed(2)} USD`,
+        `Total Amount: ${totalAmount.toFixed(2)} ${transactions[0].currency}`,
         `Total Transactions: ${transactions.length}`,
       ],
     ];
@@ -177,15 +163,15 @@ export async function POST(request: NextRequest) {
       });
       const amount = `$${parseFloat(tx.amount).toFixed(2)} ${tx.currency}`;
       const status = tx.status.charAt(0).toUpperCase() + tx.status.slice(1);
-      const hash = maskTxHash(tx.transaction_hash || "-");
+      const intentId = maskTxHash(tx.intent_id?.toString() || "-");
 
-      return [date, amount, status, hash];
+      return [date, amount, status, intentId];
     });
 
     // Transaction table with hyperlinks
     autoTable(doc, {
       startY: y,
-      head: [["Date", "Amount", "Status", "Transaction Hash"]],
+      head: [["Date", "Amount", "Status", "Transaction ID"]],
       body: transactionData,
       theme: "striped",
       headStyles: {
@@ -211,7 +197,9 @@ export async function POST(request: NextRequest) {
         if (data.column.index === 3 && data.section === "body") {
           const hash = transactions[data.row.index].transaction_hash;
           if (hash) {
-            const explorerUrl = `https://sepolia.etherscan.io/tx/${hash}`;
+            const explorerUrl = `https://explorer.nexus-folly.availproject.org/intent/${
+              transactions[data.row.index].intent_id
+            }`;
             doc.link(
               data.cell.x,
               data.cell.y,

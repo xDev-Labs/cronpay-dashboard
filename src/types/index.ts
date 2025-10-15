@@ -25,6 +25,7 @@ export interface Transaction {
   token_received_amount: string | null;
   status: "completed" | "pending" | "failed";
   transaction_hash: string | null;
+  intent_id: number | null;
   created_at: string;
   config_keys?: {
     id: string;
@@ -49,8 +50,4 @@ export const CHAIN_OPTIONS = [
 ] as const;
 
 // Token options
-export const TOKEN_OPTIONS = [
-  "USDT",
-  "USDC",
-  "ETH",
-] as const;
+export const TOKEN_OPTIONS = ["USDT", "USDC", "ETH"] as const;

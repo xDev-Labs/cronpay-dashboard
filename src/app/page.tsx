@@ -1,18 +1,10 @@
 import { auth } from "@/auth";
 import { Header } from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Transaction } from "@/types";
 import { DollarSign, TrendingUp, Key, Link } from "lucide-react";
 import { GET as getDashboard } from "@/app/api/dashboard/route";
-import { maskTxHash } from "@/lib/generate-api-key";
+import { TransactionsTable } from "@/components/ui/transaction-table";
 
 export default async function Home() {
   const session = await auth();
@@ -118,70 +110,7 @@ export default async function Home() {
           </h2>
           <Card>
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Token</TableHead>
-                    <TableHead>Chain</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Transaction Hash</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {apiData?.transactions && apiData.transactions.length > 0 ? (
-                    apiData.transactions.map((transaction) => (
-                      <TableRow key={transaction.id}>
-                        <TableCell>
-                          {(transaction.created_at
-                            ? new Date(transaction.created_at)
-                            : new Date()
-                          ).toLocaleDateString()}{" "}
-                          {(transaction.created_at
-                            ? new Date(transaction.created_at)
-                            : new Date()
-                          ).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {transaction.amount}
-                        </TableCell>
-                        <TableCell>{transaction.config_keys?.token}</TableCell>
-                        <TableCell>{transaction.config_keys?.chain}</TableCell>
-                        <TableCell>
-                          <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                              transaction.status === "completed"
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                : transaction.status === "pending"
-                                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                            }`}
-                          >
-                            {transaction.status}
-                          </span>
-                        </TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {maskTxHash(transaction.transaction_hash || "-")}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={6}
-                        className="text-center text-muted-foreground py-8"
-                      >
-                        No transactions yet. Your latest payments will appear
-                        here once you start receiving them.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+              <TransactionsTable transactions={apiData?.transactions || []} />
             </CardContent>
           </Card>
         </div>
