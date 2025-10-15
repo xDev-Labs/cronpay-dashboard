@@ -1,3 +1,5 @@
+import { CHAIN_OPTIONS } from "@/types";
+
 /**
  * Generates a random alphanumeric API key of specified length
  * @param length - Length of the API key (default: 44)
@@ -45,4 +47,20 @@ export function maskAddress(address: string): string {
   const lastFive = address.slice(-5);
 
   return `${firstFive}...${lastFive}`;
+}
+export function maskTxHash(hash: string): string {
+  if (hash.length <= 10) {
+    return hash;
+  }
+
+  const first = hash.slice(0, 10);
+  const last = hash.slice(-5);
+
+  return `${first}...${last}`;
+}
+
+//function to get chain name from chain id
+export function getChainNameFromId(id: number): string {
+  const chain = CHAIN_OPTIONS.find((chain) => chain.id === id);
+  return chain?.name || String(id);
 }

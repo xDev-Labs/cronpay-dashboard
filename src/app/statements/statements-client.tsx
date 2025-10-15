@@ -22,6 +22,7 @@ import {
 import { Transaction } from "@/types";
 import { FileText, FileSpreadsheet, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { getChainNameFromId, maskTxHash } from "@/lib/generate-api-key";
 
 interface StatementsPageClientProps {
   user: {
@@ -86,22 +87,29 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
 
     const csvContent = [
       headers.join(","),
-      ...transactions.map((tx) => [
-        new Date(tx.created_at).toLocaleDateString(),
-        tx.amount,
-        tx.currency,
-        tx.config_keys?.token || "",
-        tx.config_keys?.chain || "",
-        tx.status,
-        tx.transaction_hash || "",
-      ].join(",")),
+      ...transactions.map((tx) =>
+        [
+          new Date(tx.created_at).toLocaleDateString(),
+          tx.amount,
+          tx.currency,
+          tx.config_keys?.token || "",
+          tx.config_keys?.chain || "",
+          tx.status,
+          tx.transaction_hash || "",
+        ].join(",")
+      ),
     ].join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `statements-${selectedPeriod}-${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute(
+      "download",
+      `statements-${selectedPeriod}-${
+        new Date().toISOString().split("T")[0]
+      }.csv`
+    );
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -133,7 +141,9 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `statements-${selectedPeriod}-${new Date().toISOString().split('T')[0]}.pdf`;
+      link.download = `statements-${selectedPeriod}-${
+        new Date().toISOString().split("T")[0]
+      }.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -156,7 +166,9 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
 
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">Account Statements</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Account Statements
+          </h1>
         </div>
 
         <div className="mb-6 flex items-center gap-4">
@@ -164,7 +176,10 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Time Period:</span>
           </div>
-          <Select value={selectedPeriod} onValueChange={(value: TimePeriod) => setSelectedPeriod(value)}>
+          <Select
+            value={selectedPeriod}
+            onValueChange={(value: TimePeriod) => setSelectedPeriod(value)}
+          >
             <SelectTrigger className="w-48">
               <SelectValue />
             </SelectTrigger>
@@ -209,12 +224,15 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
           <CardContent className="p-0">
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <div className="text-muted-foreground">Loading transactions...</div>
+                <div className="text-muted-foreground">
+                  Loading transactions...
+                </div>
               </div>
             ) : transactions.length === 0 ? (
               <div className="flex items-center justify-center py-8">
                 <div className="text-muted-foreground">
-                  No transactions found for {getPeriodLabel(selectedPeriod).toLowerCase()}
+                  No transactions found for{" "}
+                  {getPeriodLabel(selectedPeriod).toLowerCase()}
                 </div>
               </div>
             ) : (
@@ -235,31 +253,39 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
                     <TableRow key={transaction.id}>
                       <TableCell>
                         {new Date(transaction.created_at).toLocaleDateString()}{" "}
-                        {new Date(transaction.created_at).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {new Date(transaction.created_at).toLocaleTimeString(
+                          [],
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
                       </TableCell>
                       <TableCell className="font-medium">
                         {transaction.amount}
                       </TableCell>
                       <TableCell>{transaction.currency}</TableCell>
                       <TableCell>{transaction.config_keys?.token}</TableCell>
-                      <TableCell>{transaction.config_keys?.chain}</TableCell>
+                      <TableCell>
+                        {getChainNameFromId(
+                          Number(transaction.config_keys?.chain)
+                        )}
+                      </TableCell>
                       <TableCell>
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${transaction.status === "completed"
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                            transaction.status === "completed"
                               ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                               : transaction.status === "pending"
-                                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                            }`}
+                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                          }`}
                         >
                           {transaction.status}
                         </span>
                       </TableCell>
                       <TableCell className="font-mono text-sm">
-                        {transaction.transaction_hash}
+                        {maskTxHash(transaction.transaction_hash || "-")}
                       </TableCell>
                     </TableRow>
                   ))}

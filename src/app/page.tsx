@@ -12,6 +12,7 @@ import {
 import { Transaction } from "@/types";
 import { DollarSign, TrendingUp, Key } from "lucide-react";
 import { GET as getDashboard } from "@/app/api/dashboard/route";
+import { maskTxHash } from "@/lib/generate-api-key";
 
 export default async function Home() {
   const session = await auth();
@@ -160,7 +161,7 @@ export default async function Home() {
                           </span>
                         </TableCell>
                         <TableCell className="font-mono text-sm">
-                          {transaction.transaction_hash}
+                          {maskTxHash(transaction.transaction_hash || "-")}
                         </TableCell>
                       </TableRow>
                     ))

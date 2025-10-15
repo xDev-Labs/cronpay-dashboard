@@ -66,7 +66,7 @@ export async function GET() {
     revenue: {
       today: todayTotal,
       monthly: monthTotal,
-      currency: "USD",
+      currency: transactions[0].currency,
     },
     stats: {
       totalKeys: keysCount || 0,
