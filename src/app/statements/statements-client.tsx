@@ -262,7 +262,7 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
                   <TableRow>
                     <TableHead>Date</TableHead>
                     <TableHead>Amount</TableHead>
-                    <TableHead>Currency</TableHead>
+                    {/* <TableHead>Currency</TableHead> */}
                     <TableHead>Token</TableHead>
                     <TableHead>Chain</TableHead>
                     <TableHead>Status</TableHead>
@@ -283,9 +283,12 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
                         )}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {transaction.amount}
+                        {new Intl.NumberFormat(undefined, {
+                          style: "currency",
+                          currency: transaction.currency,
+                        }).format(Number(transaction.amount))}
                       </TableCell>
-                      <TableCell>{transaction.currency}</TableCell>
+                      {/* <TableCell>{transaction.currency}</TableCell> */}
                       <TableCell>{transaction.config_keys?.token}</TableCell>
                       <TableCell>
                         {getChainNameFromId(

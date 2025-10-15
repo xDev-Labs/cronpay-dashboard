@@ -67,7 +67,10 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
                 })}
               </TableCell>
               <TableCell className="font-medium">
-                {transaction.amount}
+                {new Intl.NumberFormat(undefined, {
+                  style: "currency",
+                  currency: transaction.currency,
+                }).format(Number(transaction.amount))}
               </TableCell>
               <TableCell>{transaction.config_keys?.token}</TableCell>
               <TableCell>{transaction.config_keys?.chain}</TableCell>
