@@ -30,6 +30,7 @@ export function Header({ user }: HeaderProps) {
     { href: "/", label: "Dashboard" },
     { href: "/keys", label: "Keys" },
     { href: "/statements", label: "Account Statement" },
+    { href: "/docs", label: "Docs" },
   ];
 
   const handleSignOut = async () => {
