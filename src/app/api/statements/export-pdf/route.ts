@@ -5,6 +5,12 @@ import { maskTxHash } from "@/lib/generate-api-key";
 
 type TimePeriod = "today" | "7days" | "30days" | "6months" | "1year";
 
+interface jsPDFWithAutoTable extends jsPDF {
+  lastAutoTable: {
+    finalY: number;
+  };
+}
+
 interface Transaction {
   id: string;
   amount: string;
@@ -152,7 +158,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    y = (doc as any).lastAutoTable.finalY + 15;
+    y = (doc as jsPDFWithAutoTable).lastAutoTable.finalY + 15;
 
     // Transactions section
     doc.setFontSize(14);
@@ -234,7 +240,7 @@ export async function POST(request: NextRequest) {
     });
 
     // End notice
-    y = (doc as any).lastAutoTable.finalY + 15;
+    y = (doc as jsPDFWithAutoTable).lastAutoTable.finalY + 15;
     doc.setFillColor(245, 245, 245);
     doc.rect(20, y, pageWidth - 40, 12, "F");
     doc.setFontSize(9);
