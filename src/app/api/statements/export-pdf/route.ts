@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text("Digital Payment Solutions", 20, 26);
+    doc.text("Crypto Payment Gateway", 20, 26);
 
     // Reset text color
     doc.setTextColor(0, 0, 0);
@@ -142,8 +142,8 @@ export async function POST(request: NextRequest) {
         lineWidth: 0.3,
       },
       columnStyles: {
-        0: { fillColor: [245, 245, 245] }, // light grey
-        1: { fillColor: [255, 255, 255] },
+        0: { fillColor: [255, 255, 255] },
+        1: { fillColor: [245, 245, 245] }, // light grey
       },
       margin: { left: 20, right: 20 },
       didDrawCell: (data) => {
@@ -262,7 +262,7 @@ export async function POST(request: NextRequest) {
       doc.text(
         `Generated on ${new Date().toLocaleDateString(
           "en-US"
-        )} | CRONPAY Digital Payment Solutions`,
+        )} | CRONPAY Crypto Payment Gateway`,
         20,
         pageHeight - 12
       );
