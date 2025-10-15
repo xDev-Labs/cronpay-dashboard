@@ -266,7 +266,7 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
                     <TableHead>Token</TableHead>
                     <TableHead>Chain</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Transaction Hash</TableHead>
+                    <TableHead>Transaction ID</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
