@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CronPay Dashboard
 
-## Getting Started
+A modern blockchain payment tracking and management platform built with Next.js. CronPay Dashboard enables users to manage cryptocurrency payment configurations, track transactions across multiple blockchain networks, and generate detailed financial statements.
 
-First, run the development server:
+## Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+CronPay Dashboard is a comprehensive solution for businesses and individuals who need to manage cryptocurrency payments at scale. The platform provides a centralized interface to configure payment endpoints, monitor transaction status, and analyze revenue across different blockchain networks and tokens.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Key Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Dashboard & Analytics
+- **Revenue Tracking**: Real-time display of daily and monthly revenue
+- **Transaction Overview**: Quick access to recent payment transactions
+- **API Keys Statistics**: Monitor the number of active payment configurations
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Config Keys Management
+- **Blockchain Configuration**: Create payment configurations for different blockchain networks
+- **Multi-Token Support**: Configure receiver addresses for various tokens (USDT, USDC, ETH, BNB, etc.)
+- **API Key Generation**: Automatically generate unique API keys for integration
+- **CRUD Operations**: Create, read, update, and delete payment configurations
+- **Secure Address Masking**: Safely display wallet addresses with masking
 
-## Learn More
+### Transaction Tracking
+- **Real-time Monitoring**: Track all incoming cryptocurrency payments
+- **Multi-Chain Support**: Support for multiple blockchain networks (Ethereum, BSC, Polygon, Avalanche, etc.)
+- **Status Tracking**: Monitor transaction status (pending, completed, failed)
+- **Transaction Details**: View sender addresses, transaction hashes, amounts, and timestamps
 
-To learn more about Next.js, take a look at the following resources:
+### Account Statements
+- **Flexible Time Periods**: Generate statements for various periods (today, 7 days, 30 days, 6 months, 1 year)
+- **CSV Export**: Export transaction data in CSV format for accounting software
+- **PDF Export**: Generate professional PDF statements for record-keeping
+- **Filterable Views**: Filter transactions by time period for detailed analysis
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Authentication & Security
+- **Google OAuth**: Secure sign-in with Google authentication
+- **User Isolation**: All data is scoped to authenticated users
+- **Secure API Keys**: Each configuration gets a unique API key for integration
