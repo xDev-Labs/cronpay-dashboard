@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Transaction } from "@/types";
-import { Download, FileText, FileSpreadsheet, Calendar } from "lucide-react";
+import { FileText, FileSpreadsheet, Calendar } from "lucide-react";
 import { toast } from "sonner";
 
 interface StatementsPageClientProps {
@@ -106,7 +106,7 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     toast.success("CSV exported successfully");
   };
 
@@ -248,13 +248,12 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
                       <TableCell>{transaction.config_keys?.chain}</TableCell>
                       <TableCell>
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                            transaction.status === "completed"
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${transaction.status === "completed"
                               ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                               : transaction.status === "pending"
-                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                          }`}
+                                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                            }`}
                         >
                           {transaction.status}
                         </span>

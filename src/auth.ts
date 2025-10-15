@@ -44,7 +44,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const insertPayload = {
             email: user.email,
             name: user.name ?? null,
-            image: (user as any).image ?? null,
+            image: (user.image as string | null | undefined) ?? null,
             google_id: googleId,
           };
 

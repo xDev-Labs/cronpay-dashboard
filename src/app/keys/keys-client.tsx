@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/table";
 import { CHAIN_OPTIONS, ConfigKey } from "@/types";
 import {
-  generateApiKey,
   maskApiKey,
   maskAddress,
 } from "@/lib/generate-api-key";
@@ -53,7 +52,7 @@ export function KeysPageClient({ user }: KeysPageClientProps) {
         const res = await fetch("/api/config-keys", { cache: "no-store" });
         if (!res.ok) throw new Error(await res.text());
         const json = await res.json();
-        const loaded: ConfigKey[] = (json.keys || []).map((k: any) => ({
+        const loaded: ConfigKey[] = (json.keys || []).map((k: { id: string; chain: number; token: string; receiver_address: string; created_at: string }) => ({
           id: k.id,
           chain: chainIdToName(k.chain),
           token: k.token,
@@ -62,7 +61,7 @@ export function KeysPageClient({ user }: KeysPageClientProps) {
           createdAt: new Date(k.created_at),
         }));
         setKeys(loaded);
-      } catch (e) {
+      } catch (_e) {
         // fallback to empty on error; toast can be added if needed
         setKeys([]);
       }
@@ -94,7 +93,7 @@ export function KeysPageClient({ user }: KeysPageClientProps) {
       };
       setKeys((prev) => [key, ...prev]);
       toast.success("Config key created");
-    } catch (err: any) {
+    } catch (_err: unknown) {
       toast.error("Failed to create key");
     }
   };
@@ -119,7 +118,7 @@ export function KeysPageClient({ user }: KeysPageClientProps) {
         )
       );
       toast.success("Config key updated");
-    } catch (err: any) {
+    } catch (_err: unknown) {
       toast.error("Failed to update key");
     } finally {
       setEditingKey(undefined);
@@ -133,7 +132,7 @@ export function KeysPageClient({ user }: KeysPageClientProps) {
       if (!res.ok) throw new Error(await res.text());
       setKeys((prev) => prev.filter((key) => key.id !== id));
       toast.success("Config key deleted");
-    } catch (err: any) {
+    } catch (_err: unknown) {
       toast.error("Failed to delete key");
     }
   };
@@ -158,7 +157,7 @@ export function KeysPageClient({ user }: KeysPageClientProps) {
       setTimeout(() => {
         setCopiedKeyId(null);
       }, 2000);
-    } catch (err) {
+    } catch (_err) {
       toast.error("Failed to copy API key");
     }
   };

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Crown, LogOut, User } from "lucide-react";
+import { Crown, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -52,11 +52,10 @@ export function Header({ user }: HeaderProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === item.href
+                className={`text-sm font-medium transition-colors hover:text-primary ${pathname === item.href
                     ? "text-foreground"
                     : "text-muted-foreground"
-                }`}
+                  }`}
               >
                 {item.label}
               </Link>
