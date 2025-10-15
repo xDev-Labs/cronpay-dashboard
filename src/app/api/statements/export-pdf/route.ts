@@ -114,15 +114,6 @@ export async function POST(request: NextRequest) {
     const totalAmount = transactions
       .filter((tx) => tx.status === "completed")
       .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
-    const completedCount = transactions.filter(
-      (tx) => tx.status === "completed"
-    ).length;
-    const pendingCount = transactions.filter(
-      (tx) => tx.status === "pending"
-    ).length;
-    // const failedCount = transactions.filter(
-    //   (tx) => tx.status === "failed"
-    // ).length;
 
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
@@ -134,8 +125,6 @@ export async function POST(request: NextRequest) {
       [
         `Total Amount: ${totalAmount.toFixed(2)} USD`,
         `Total Transactions: ${transactions.length}`,
-        `Completed: ${completedCount}`,
-        `Pending: ${pendingCount}`,
       ],
     ];
 
@@ -155,8 +144,6 @@ export async function POST(request: NextRequest) {
       columnStyles: {
         0: { fillColor: [245, 245, 245] }, // light grey
         1: { fillColor: [255, 255, 255] },
-        2: { fillColor: [245, 245, 245] },
-        3: { fillColor: [255, 255, 255] },
       },
       margin: { left: 20, right: 20 },
       didDrawCell: (data) => {

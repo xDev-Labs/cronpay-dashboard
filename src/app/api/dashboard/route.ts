@@ -30,6 +30,7 @@ export async function GET() {
           .eq("user_id", userRow.id)
       ).data?.map((k) => k.id) || []
     )
+    .eq("status", "completed")
     .order("created_at", { ascending: false })
     .limit(50);
 

@@ -66,6 +66,7 @@ export async function GET(request: Request) {
     .in("config_key_id", configKeys.map((k) => k.id))
     .gte("created_at", start.toISOString())
     .lte("created_at", end.toISOString())
+    .eq("status", "completed")
     .order("created_at", { ascending: false });
 
   if (error) return new Response(error.message, { status: 500 });
