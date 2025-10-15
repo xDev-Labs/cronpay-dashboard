@@ -40,12 +40,12 @@ export interface RevenueStats {
 
 // Chain options
 export const CHAIN_OPTIONS = [
-  { id: 1, name: "Ethereum" },
-  { id: 137, name: "Polygon" },
-  { id: 56, name: "BSC" },
-  { id: 42161, name: "Arbitrum" },
-  { id: 10, name: "Optimism" },
-  { id: 101, name: "Solana" }, 
+  { id: 11155111, name: "Ethereum" },
+  { id: 80002, name: "Polygon" },
+  { id: 84532, name: "Base" },
+  { id: 421614, name: "Arbitrum" },
+  { id: 11155420, name: "Optimism" },
+  { id: 10143, name: "Monad" },
 ] as const;
 
 // Token options
@@ -53,8 +53,4 @@ export const TOKEN_OPTIONS = [
   "USDT",
   "USDC",
   "ETH",
-  "BTC",
-  "MATIC",
-  "SOL",
-  "BNB",
 ] as const;
