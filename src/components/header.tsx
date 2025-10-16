@@ -30,6 +30,7 @@ export function Header({ user }: HeaderProps) {
     { href: "/", label: "Dashboard" },
     { href: "/keys", label: "API Keys" },
     { href: "/statements", label: "Account Statement" },
+    { href: "/balances", label: "Unified Balances" },
     { href: "/docs", label: "Docs" },
   ];
 
