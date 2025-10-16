@@ -57,17 +57,17 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
                 {(transaction.created_at
                   ? new Date(transaction.created_at)
                   : new Date()
-                ).toLocaleDateString()}{" "}
+                ).toLocaleDateString("en-US")}{" "}
                 {(transaction.created_at
                   ? new Date(transaction.created_at)
                   : new Date()
-                ).toLocaleTimeString([], {
+                ).toLocaleTimeString("en-US", {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
               </TableCell>
               <TableCell className="font-medium">
-                {new Intl.NumberFormat(undefined, {
+                {new Intl.NumberFormat("en-US", {
                   style: "currency",
                   currency: transaction.currency,
                 }).format(Number(transaction.amount))}

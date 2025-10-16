@@ -50,7 +50,7 @@ export default async function Home() {
               <CardContent>
                 <div className="text-2xl font-bold">
                   {apiData
-                    ? new Intl.NumberFormat(undefined, {
+                    ? new Intl.NumberFormat("en-US", {
                         style: "currency",
                         currency: apiData.revenue.currency,
                       }).format(apiData.revenue.today)
@@ -71,7 +71,7 @@ export default async function Home() {
               <CardContent>
                 <div className="text-2xl font-bold">
                   {apiData
-                    ? new Intl.NumberFormat(undefined, {
+                    ? new Intl.NumberFormat("en-US", {
                         style: "currency",
                         currency: apiData.revenue.currency,
                       }).format(apiData.revenue.monthly)
