@@ -1,11 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { WalletConnection } from "@/components/ui/connect-wallet";
 import { useNexus } from "@/components/providers/NexusProvider";
 import { Header } from "@/components/header";
 import { Card, CardContent } from "@/components/ui/card";
-import { Wallet, Coins } from "lucide-react";
+import { Wallet } from "lucide-react";
 import { UnifiedBalances } from "@/components/ui/unified-balances";
 
 interface BalancePageClientProps {
@@ -17,8 +18,48 @@ interface BalancePageClientProps {
 }
 
 export default function BalancePageClient({ user }: BalancePageClientProps) {
-  const { isConnected } = useAccount();
-  const { isInitialized, isLoading } = useNexus();
+  const { isConnected, address, isReconnecting } = useAccount();
+  const { isInitialized, isLoading, refreshBalances } = useNexus();
+
+  // Consider wallet connected if we have an address, regardless of isConnected flag
+  const hasWallet = Boolean(address) || isConnected;
+
+  // Trigger refresh when everything is ready
+//   useEffect(() => {
+//     if (hasWallet && isInitialized && address) {
+//       const timer = setTimeout(() => {
+//         refreshBalances();
+//       }, 500);
+//       return () => clearTimeout(timer);
+//     }
+//   }, [hasWallet, isInitialized, address, refreshBalances]);
+
+  // Determine UI states based on wallet presence
+  const shouldShowConnectPrompt = !hasWallet && !isReconnecting;
+  const shouldShowLoading = (hasWallet && !isInitialized) || isReconnecting;
+  const shouldShowBalances = hasWallet && isInitialized;
+
+  // Debug logging
+  useEffect(() => {
+    console.log("UI State:", {
+      isConnected,
+      hasWallet,
+      address: address?.slice(0, 10),
+      isReconnecting,
+      isInitialized,
+      isLoading,
+      shouldShowConnectPrompt,
+      shouldShowLoading,
+      shouldShowBalances,
+    });
+  }, [
+    isConnected,
+    hasWallet,
+    address,
+    isReconnecting,
+    isInitialized,
+    isLoading,
+  ]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -33,12 +74,18 @@ export default function BalancePageClient({ user }: BalancePageClientProps) {
             <p className="text-muted-foreground">
               View your assets across all connected chains
             </p>
-            <p>{isConnected ? "Connected" : "Not Connected"}</p>
+            {/* Debug info - remove in production */}
+            {/* <p className="text-xs text-gray-400 mt-1">
+              Status:{" "}
+              {hasWallet
+                ? `Connected (${address?.slice(0, 6)}...${address?.slice(-4)})`
+                : "Not Connected"}{" "}
+              | SDK: {isInitialized ? "Ready" : "Initializing"}
+            </p> */}
           </div>
         </div>
 
-        {/* Wallet Connection Status */}
-        {!isConnected ? (
+        {shouldShowConnectPrompt && (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Wallet className="h-12 w-12 text-muted-foreground mb-4" />
@@ -52,38 +99,32 @@ export default function BalancePageClient({ user }: BalancePageClientProps) {
               <WalletConnection />
             </CardContent>
           </Card>
-        ) : !isInitialized ? (
+        )}
+
+        {shouldShowLoading && (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-4"></div>
               <h3 className="text-lg font-semibold mb-2">
-                Initializing Nexus SDK
+                {isReconnecting
+                  ? "Reconnecting Wallet..."
+                  : "Initializing Nexus SDK"}
               </h3>
               <p className="text-muted-foreground text-center">
-                Setting up your multi-chain experience...
+                {isReconnecting
+                  ? "Restoring your wallet connection..."
+                  : "Setting up your multi-chain experience..."}
               </p>
             </CardContent>
           </Card>
-        ) : (
+        )}
+
+        {shouldShowBalances && (
           <Card>
             <CardContent className="p-6">
               <UnifiedBalances />
             </CardContent>
           </Card>
-        )}
-
-        {/* Loading Overlay */}
-        {isConnected && isLoading && !isInitialized && (
-          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-background rounded-xl p-6 shadow-xl border">
-              <div className="flex items-center space-x-3">
-                <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
-                <span className="text-foreground">
-                  Initializing Nexus SDK...
-                </span>
-              </div>
-            </div>
-          </div>
         )}
       </main>
     </div>
