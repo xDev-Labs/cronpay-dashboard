@@ -51,3 +51,20 @@ export const CHAIN_OPTIONS = [
 
 // Token options
 export const TOKEN_OPTIONS = ["USDT", "USDC", "ETH"] as const;
+
+// Balance types for Nexus SDK
+export interface BalanceBreakdown {
+  chain: {
+    name: string;
+  };
+  balance: string;
+}
+
+export interface UnifiedBalance {
+  symbol: string;
+  balance: string;
+  balanceInFiat: number;
+  chainId?: string | number;
+  icon?: string;
+  breakdown?: BalanceBreakdown[];
+}

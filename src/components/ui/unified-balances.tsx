@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useNexus } from "../providers/NexusProvider";
 import { ConnectKitButton } from "connectkit";
+import { BalanceBreakdown } from "../../types";
 
 export function UnifiedBalances() {
   const { balances, isLoading, sdk, isInitialized, error, refreshBalances } =
@@ -136,19 +137,23 @@ export function UnifiedBalances() {
               {/* Per-chain breakdown */}
               {balance.breakdown && balance.breakdown.length > 0 && (
                 <div className="mt-2 space-y-1">
-                  {balance.breakdown.map((item: any, idx: number) => (
-                    <div
-                      key={idx}
-                      className={`text-sm flex justify-between ${
-                        item.balance === "0" ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
-                      <span className="flex items-center gap-1">
-                        {item.chain.name}
-                      </span>
-                      <span className="font-mono">{item.balance}</span>
-                    </div>
-                  ))}
+                  {balance.breakdown.map(
+                    (item: BalanceBreakdown, idx: number) => (
+                      <div
+                        key={idx}
+                        className={`text-sm flex justify-between ${
+                          item.balance === "0"
+                            ? "text-gray-400"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        <span className="flex items-center gap-1">
+                          {item.chain.name}
+                        </span>
+                        <span className="font-mono">{item.balance}</span>
+                      </div>
+                    )
+                  )}
                 </div>
               )}
             </div>

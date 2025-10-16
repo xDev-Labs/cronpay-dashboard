@@ -10,18 +10,13 @@ import {
 } from "react";
 import { useAccount } from "wagmi";
 import { usePathname } from "next/navigation";
-
-// Global window extension for wallet provider
-declare global {
-  interface Window {
-    ethereum?: any;
-  }
-}
+import { NexusSDK } from "@avail-project/nexus";
+import { UnifiedBalance } from "../../types";
 
 interface NexusContextType {
-  sdk: any;
+  sdk: NexusSDK | null;
   isInitialized: boolean;
-  balances: any[];
+  balances: UnifiedBalance[];
   isLoading: boolean;
   error: string | null;
   refreshBalances: () => Promise<void>;
@@ -36,9 +31,9 @@ interface NexusProviderProps {
 export function NexusProvider({ children }: NexusProviderProps) {
   const { isConnected, address } = useAccount();
   const pathname = usePathname();
-  const [sdk, setSdk] = useState<any>(null);
+  const [sdk, setSdk] = useState<NexusSDK | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [balances, setBalances] = useState<any[]>([]);
+  const [balances, setBalances] = useState<UnifiedBalance[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -96,7 +91,7 @@ export function NexusProvider({ children }: NexusProviderProps) {
           sources,
         }: {
           allow: (allowances: string[]) => void;
-          sources: any[];
+          sources: unknown[];
         }) => {
           console.log("Allowance required for sources:", sources);
 
@@ -108,7 +103,7 @@ export function NexusProvider({ children }: NexusProviderProps) {
 
       // Set up intent hook for transaction previews
       nexusSDK.setOnIntentHook(
-        ({ intent, allow }: { intent: any; allow: () => void }) => {
+        ({ intent, allow }: { intent: unknown; allow: () => void }) => {
           console.log("Transaction intent:", intent);
 
           // For Part 1, we'll auto-approve
