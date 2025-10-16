@@ -47,9 +47,9 @@ export function UnifiedBalances() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">
+          {/* <h2 className="text-2xl font-bold text-slate-900">
             Unified Balances
-          </h2>
+          </h2> */}
           {/* <p className="text-slate-600">
             Your assets across all connected chains
           </p> */}

@@ -283,7 +283,7 @@ export function StatementsPageClient({ user }: StatementsPageClientProps) {
                         )}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {new Intl.NumberFormat(undefined, {
+                        {new Intl.NumberFormat("en-US", {
                           style: "currency",
                           currency: transaction.currency,
                         }).format(Number(transaction.amount))}
