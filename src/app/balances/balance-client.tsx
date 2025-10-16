@@ -25,14 +25,14 @@ export default function BalancePageClient({ user }: BalancePageClientProps) {
   const hasWallet = Boolean(address) || isConnected;
 
   // Trigger refresh when everything is ready
-//   useEffect(() => {
-//     if (hasWallet && isInitialized && address) {
-//       const timer = setTimeout(() => {
-//         refreshBalances();
-//       }, 500);
-//       return () => clearTimeout(timer);
-//     }
-//   }, [hasWallet, isInitialized, address, refreshBalances]);
+  //   useEffect(() => {
+  //     if (hasWallet && isInitialized && address) {
+  //       const timer = setTimeout(() => {
+  //         refreshBalances();
+  //       }, 500);
+  //       return () => clearTimeout(timer);
+  //     }
+  //   }, [hasWallet, isInitialized, address, refreshBalances]);
 
   // Determine UI states based on wallet presence
   const shouldShowConnectPrompt = !hasWallet && !isReconnecting;
@@ -69,7 +69,7 @@ export default function BalancePageClient({ user }: BalancePageClientProps) {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-            Asset Breakdown
+              Asset Breakdown
             </h1>
             <p className="text-muted-foreground">
               View your assets across all connected chains
