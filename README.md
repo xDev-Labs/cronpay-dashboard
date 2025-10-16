@@ -29,7 +29,7 @@ CronPay Dashboard is a comprehensive solution for businesses and individuals who
 ### Account Statements
 - **Flexible Time Periods**: Generate statements for various periods (today, 7 days, 30 days, 6 months, 1 year)
 - **CSV Export**: Export transaction data in CSV format for accounting software
-- **PDF Export**: Generate professional PDF statements for record-keeping
+- **PDF Export**: Generate professional PDF statements for record-keeping.
 - **Filterable Views**: Filter transactions by time period for detailed analysis.
 
 ### Authentication & Security
