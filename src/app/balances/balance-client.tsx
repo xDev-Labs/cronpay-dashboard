@@ -101,7 +101,7 @@ export default function BalancePageClient({ user }: BalancePageClientProps) {
           </Card>
         )}
 
-        {shouldShowLoading && (
+        {shouldShowLoading && !shouldShowBalances && (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-4"></div>
