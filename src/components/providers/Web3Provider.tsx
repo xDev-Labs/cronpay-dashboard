@@ -1,86 +1,73 @@
 "use client";
-
 import { WagmiProvider, createConfig, http } from "wagmi";
 import {
+  mainnet,
+  base,
+  arbitrum,
+  optimism,
+  polygon,
   sepolia,
   baseSepolia,
-  polygonAmoy,
   arbitrumSepolia,
   optimismSepolia,
+  polygonAmoy,
 } from "wagmi/chains";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactNode, useState } from "react";
 
-// Configure wagmi with ConnectKit - testnets only for development
+const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+
 const config = createConfig(
   getDefaultConfig({
-    // Your dApp info
-    appName: "Nexus SDK Tutorial - Part 1",
-    appDescription: "Learning chain abstraction with unified balance viewing",
-    appUrl: "https://localhost:3000",
-    appIcon: "/next.svg", // Add Avail logo to your public folder
-
-    // WalletConnect Project ID (get from https://cloud.walletconnect.com)
-    walletConnectProjectId:
-      process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ||
-      "your-wallet-connect-project-id",
-
-    // Supported chains - testnets only for safe development
     chains: [
-      sepolia, // Ethereum testnet
-      baseSepolia, // Base testnet
-      polygonAmoy, // Polygon testnet
-      arbitrumSepolia, // Arbitrum testnet
-      optimismSepolia, // Optimism testnet
+      mainnet,
+      base,
+      polygon,
+      arbitrum,
+      optimism,
+      sepolia,
+      baseSepolia,
+      arbitrumSepolia,
+      optimismSepolia,
+      polygonAmoy,
     ],
     transports: {
-      [sepolia.id]: http(),
-      [baseSepolia.id]: http(),
-      [polygonAmoy.id]: http(),
-      [arbitrumSepolia.id]: http(),
-      [optimismSepolia.id]: http(),
+      [mainnet.id]: http(mainnet.rpcUrls.default.http[0]),
+      [arbitrum.id]: http(arbitrum.rpcUrls.default.http[0]),
+      [base.id]: http(base.rpcUrls.default.http[0]),
+      [optimism.id]: http(optimism.rpcUrls.default.http[0]),
+      [polygon.id]: http(polygon.rpcUrls.default.http[0]),
+      [sepolia.id]: http(sepolia.rpcUrls.default.http[0]),
+      [baseSepolia.id]: http(baseSepolia.rpcUrls.default.http[0]),
+      [arbitrumSepolia.id]: http(arbitrumSepolia.rpcUrls.default.http[0]),
+      [optimismSepolia.id]: http(optimismSepolia.rpcUrls.default.http[0]),
+      [polygonAmoy.id]: http(polygonAmoy.rpcUrls.default.http[0]),
     },
+
+    walletConnectProjectId: walletConnectProjectId!,
+
+    // Required App Info
+    appName: "CronPay Gateway",
+
+    // Optional App Info
+    appDescription: "Crypto Payment Gateway",
+    appUrl: "https://cronpay.com",
+    appIcon: "https://cronpay.com/icon.png",
   })
 );
 
-interface Web3ProviderProps {
-  children: ReactNode;
-}
+const queryClient = new QueryClient();
 
-export function Web3Provider({ children }: Web3ProviderProps) {
-  // Create a client for TanStack Query (required by wagmi)
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 1000 * 60 * 5, // 5 minutes
-            retry: false,
-          },
-        },
-      })
-  );
-
+export const Web3Provider = ({ children }: { children: React.ReactNode }) => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <WagmiProvider config={config}>
-        <ConnectKitProvider
-          theme="auto"
-          mode="light"
-          customTheme={{
-            "--ck-border-radius": "8px",
-            "--ck-primary-button-background": "#2563eb",
-            "--ck-primary-button-hover-background": "#1d4ed8",
-          }}
-          options={{
-            enforceSupportedChains: false,
-            walletConnectName: "Nexus Tutorial",
-          }}
-        >
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <ConnectKitProvider theme="soft" mode="light">
           {children}
         </ConnectKitProvider>
-      </WagmiProvider>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
-}
+};
+
+export default Web3Provider;

@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
-import { WalletConnection } from "@/components/ui/connect-wallet";
 import { useNexus } from "@/components/providers/NexusProvider";
 import { Header } from "@/components/header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Wallet } from "lucide-react";
 import { UnifiedBalances } from "@/components/ui/unified-balances";
+import { ConnectKitButton } from "connectkit";
 
 interface BalancePageClientProps {
   user: {
@@ -69,7 +69,7 @@ export default function BalancePageClient({ user }: BalancePageClientProps) {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Unified Balances
+            Asset Breakdown
             </h1>
             <p className="text-muted-foreground">
               View your assets across all connected chains
@@ -96,7 +96,7 @@ export default function BalancePageClient({ user }: BalancePageClientProps) {
                 Connect your wallet to view your unified balances across all
                 supported chains
               </p>
-              <WalletConnection />
+              <ConnectKitButton />
             </CardContent>
           </Card>
         )}

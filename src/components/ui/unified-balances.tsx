@@ -8,6 +8,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useNexus } from "../providers/NexusProvider";
+import { ConnectKitButton } from "connectkit";
 
 export function UnifiedBalances() {
   const { balances, isLoading, sdk, isInitialized, error, refreshBalances } =
@@ -49,9 +50,10 @@ export function UnifiedBalances() {
           <h2 className="text-2xl font-bold text-slate-900">
             Unified Balances
           </h2>
-          <p className="text-slate-600">
+          {/* <p className="text-slate-600">
             Your assets across all connected chains
-          </p>
+          </p> */}
+          <ConnectKitButton />
         </div>
         <button
           onClick={refreshBalances}
@@ -62,7 +64,33 @@ export function UnifiedBalances() {
           <span>{isLoading ? "Loading..." : "Refresh"}</span>
         </button>
       </div>
-
+      {balances.length > 0 && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+          <h3 className="font-semibold text-slate-900 mb-3">Account Summary</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-slate-500">Total Assets</p>
+              <p className="text-lg font-semibold text-slate-900">
+                {balances.length}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-slate-500">Chains</p>
+              <p className="text-lg font-semibold text-slate-900">
+                {new Set(balances.map((b) => b.chainId)).size}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-slate-500">Last Updated</p>
+              <p className="text-sm text-slate-700">Just now</p>
+            </div>
+            <div>
+              <p className="text-sm text-slate-500">Status</p>
+              <p className="text-sm text-green-600 font-medium">Active</p>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Balance Cards */}
       {balances.length === 0 ? (
         <div className="text-center py-12">
@@ -125,37 +153,6 @@ export function UnifiedBalances() {
               )}
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Summary Stats */}
-      {balances.length > 0 && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-          <h3 className="font-semibold text-slate-900 mb-3">
-            Portfolio Summary
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <p className="text-sm text-slate-500">Total Assets</p>
-              <p className="text-lg font-semibold text-slate-900">
-                {balances.length}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">Chains</p>
-              <p className="text-lg font-semibold text-slate-900">
-                {new Set(balances.map((b) => b.chainId)).size}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">Last Updated</p>
-              <p className="text-sm text-slate-700">Just now</p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">Status</p>
-              <p className="text-sm text-green-600 font-medium">Active</p>
-            </div>
-          </div>
         </div>
       )}
     </div>
