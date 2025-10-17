@@ -1,22 +1,36 @@
 "use client";
 
 import {
+  EthereumProvider,
+  NexusSDK,
+  OnAllowanceHookData,
+  OnIntentHookData,
+  UserAsset,
+} from "@avail-project/nexus-core";
+import React, {
   createContext,
   useContext,
-  useEffect,
-  useState,
-  useRef,
   ReactNode,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  SetStateAction,
+  Dispatch,
+  useRef,
 } from "react";
 import { useAccount } from "wagmi";
-import { usePathname } from "next/navigation";
-import { NexusSDK } from "@avail-project/nexus";
-import { UnifiedBalance } from "../../types";
 
 interface NexusContextType {
-  sdk: NexusSDK | null;
+  nexusSdk: NexusSDK | undefined;
   isInitialized: boolean;
-  balances: UnifiedBalance[];
+  allowanceModal: OnAllowanceHookData | null;
+  setAllowanceModal: Dispatch<SetStateAction<OnAllowanceHookData | null>>;
+  intentModal: OnIntentHookData | null;
+  setIntentModal: Dispatch<SetStateAction<OnIntentHookData | null>>;
+  cleanupSDK: () => void;
+  // Balance-related state and methods
+  balances: UserAsset[];
   isLoading: boolean;
   error: string | null;
   refreshBalances: () => Promise<void>;
@@ -26,172 +40,180 @@ const NexusContext = createContext<NexusContextType | undefined>(undefined);
 
 interface NexusProviderProps {
   children: ReactNode;
+  isConnected: boolean;
 }
 
-export function NexusProvider({ children }: NexusProviderProps) {
-  const { isConnected, address } = useAccount();
-  const pathname = usePathname();
-  const [sdk, setSdk] = useState<NexusSDK | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [balances, setBalances] = useState<UnifiedBalance[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+export const NexusProvider: React.FC<NexusProviderProps> = ({
+  children,
+  isConnected,
+}) => {
+  const [nexusSdk, setNexusSdk] = useState<NexusSDK | undefined>(undefined);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [allowanceModal, setAllowanceModal] =
+    useState<OnAllowanceHookData | null>(null);
+  const [intentModal, setIntentModal] = useState<OnIntentHookData | null>(null);
+  // Balance-related state
+  const [balances, setBalances] = useState<UserAsset[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const isInitializingRef = useRef<boolean>(false);
 
-  // Use ref to track initialization to prevent double-initialization
-  const initializingRef = useRef(false);
-  const lastAddressRef = useRef<string | undefined>(undefined);
+  const { connector } = useAccount();
 
-  // Check if we're on a route that needs Nexus SDK
-  const shouldEnableNexus =
-    pathname?.includes("/balance") || pathname?.includes("/unified-balances");
+  const initializeSDK = useCallback(async () => {
+    if (isConnected && !nexusSdk && connector && !isInitializingRef.current) {
+      try {
+        isInitializingRef.current = true;
+        console.log("Initializing Nexus SDK...");
 
-  // Initialize SDK when wallet connects or address changes, but ONLY on specific routes
-  useEffect(() => {
-    const shouldInitialize =
-      shouldEnableNexus && // Only initialize on balances route
-      address &&
-      window.ethereum &&
-      !isInitialized &&
-      !initializingRef.current &&
-      lastAddressRef.current !== address;
+        // Get the EIP-1193 provider from the connector
+        // For ConnectKit/wagmi, we need to get the provider from the connector
+        const provider = (await connector.getProvider()) as EthereumProvider;
 
-    if (shouldInitialize) {
-      console.log("Starting SDK initialization for address:", address);
-      lastAddressRef.current = address;
-      initializeSDK();
+        if (!provider) {
+          throw new Error("No EIP-1193 provider available");
+        }
+
+        const sdk = new NexusSDK({
+          network: "testnet",
+          debug: true,
+        });
+
+        await sdk.initialize(provider);
+        setNexusSdk(sdk);
+
+        console.log("Supported chains", sdk.utils.getSupportedChains());
+        setIsInitialized(true);
+
+        sdk.setOnAllowanceHook(async (data: OnAllowanceHookData) => {
+          console.log("SDK: Allowance hook triggered", data);
+          // This is a hook for the dev to show user the allowances that need to be setup for the current tx to happen
+          // where,
+          // sources: an array of objects with minAllowance, chainID, token symbol, etc.
+          // allow(allowances): continues the transaction flow with the specified allowances; `allowances` is an array with the chosen allowance for each of the requirements (allowances.length === sources.length), either 'min', 'max', a bigint or a string
+          // deny(): stops the flow
+          setAllowanceModal(data);
+        });
+
+        sdk.setOnIntentHook((data: OnIntentHookData) => {
+          console.log("SDK: Intent hook triggered", data);
+          // This is a hook for the dev to show user the intent, the sources and associated fees
+          // where,
+          // intent: Intent data containing sources and fees for display purpose
+          // allow(): accept the current intent and continue the flow
+          // deny(): deny the intent and stop the flow
+          // refresh(): should be on a timer of 5s to refresh the intent (old intents might fail due to fee changes if not refreshed)
+          setIntentModal(data);
+        });
+      } catch (error) {
+        console.error("Failed to initialize NexusSDK:", error);
+        setIsInitialized(false);
+      } finally {
+        isInitializingRef.current = false;
+      }
     }
-  }, [address, isInitialized, shouldEnableNexus]); // Remove isConnected dependency
+  }, [isConnected, nexusSdk, connector]);
 
-  const initializeSDK = async () => {
-    // Prevent concurrent initializations
-    if (initializingRef.current) {
-      console.log("SDK initialization already in progress");
-      return;
-    }
-
-    initializingRef.current = true;
+  const refreshBalances = useCallback(async () => {
+    if (!nexusSdk || !isInitialized) return;
 
     try {
       setIsLoading(true);
       setError(null);
-
-      console.log("Initializing Nexus SDK...");
-
-      // Dynamic import to ensure client-side only loading
-      const { NexusSDK } = await import("@avail-project/nexus");
-      const nexusSDK = new NexusSDK({ network: "testnet" });
-
-      // Initialize with the wallet provider
-      await nexusSDK.initialize(window.ethereum);
-
-      // Set up allowance hook for token approvals
-      nexusSDK.setOnAllowanceHook(
-        async ({
-          allow,
-          sources,
-        }: {
-          allow: (allowances: string[]) => void;
-          sources: unknown[];
-        }) => {
-          console.log("Allowance required for sources:", sources);
-
-          // For Part 1, we'll auto-approve with minimum allowances
-          const allowances = sources.map(() => "min");
-          allow(allowances);
-        }
-      );
-
-      // Set up intent hook for transaction previews
-      nexusSDK.setOnIntentHook(
-        ({ intent, allow }: { intent: unknown; allow: () => void }) => {
-          console.log("Transaction intent:", intent);
-
-          // For Part 1, we'll auto-approve
-          allow();
-        }
-      );
-
-      setSdk(nexusSDK);
-      setIsInitialized(true);
-
-      console.log("Nexus SDK initialized successfully");
-
-      // Fetch initial balances
-      await fetchBalances(nexusSDK);
-    } catch (error) {
-      console.error("Failed to initialize Nexus SDK:", error);
+      const unifiedBalance = await nexusSdk.getUnifiedBalances();
+      console.log("unifiedBalance", unifiedBalance);
+      setBalances(unifiedBalance);
+    } catch (error: unknown) {
+      console.error("Unable to fetch balance", error);
       setError(
-        error instanceof Error ? error.message : "Failed to initialize SDK"
-      );
-      setIsInitialized(false);
-    } finally {
-      setIsLoading(false);
-      initializingRef.current = false;
-    }
-  };
-
-  const fetchBalances = async (sdkInstance = sdk) => {
-    if (!sdkInstance) {
-      console.log("Cannot fetch balances: SDK not available");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      console.log("Fetching unified balances...");
-      const unifiedBalances = await sdkInstance.getUnifiedBalances();
-      setBalances(unifiedBalances);
-      console.log("Unified balances fetched:", unifiedBalances);
-    } catch (error) {
-      console.error("Failed to fetch balances:", error);
-      setError(
-        error instanceof Error ? error.message : "Failed to fetch balances"
+        error instanceof Error ? error.message : "Failed to fetch balance"
       );
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [nexusSdk, isInitialized]);
 
-  const refreshBalances = async () => {
-    console.log("Refreshing balances...");
-    await fetchBalances();
-  };
-
-  // Reset state when wallet disconnects (no address means disconnected)
-  useEffect(() => {
-    if (!address) {
-      console.log("Wallet disconnected (no address), resetting state");
-      setSdk(null);
+  const cleanupSDK = useCallback(() => {
+    if (nexusSdk) {
+      console.log("Cleaning up Nexus SDK...");
+      nexusSdk.deinit();
+      setNexusSdk(undefined);
       setIsInitialized(false);
       setBalances([]);
       setError(null);
-      initializingRef.current = false;
-      lastAddressRef.current = undefined;
     }
-  }, [address]); // Use address instead of isConnected
+    isInitializingRef.current = false;
+  }, [nexusSdk]);
+
+  useEffect(() => {
+    if (!isConnected) {
+      cleanupSDK();
+    } else if (!nexusSdk && !isInitializingRef.current) {
+      initializeSDK();
+    }
+
+    return () => {
+      if (!isConnected) {
+        cleanupSDK();
+      }
+    };
+  }, [isConnected]); // Only depend on isConnected to prevent multiple calls
+
+  // Auto-fetch balances when SDK is initialized
+  useEffect(() => {
+    if (isInitialized && nexusSdk) {
+      refreshBalances();
+    }
+  }, [isInitialized, nexusSdk, refreshBalances]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (nexusSdk) {
+        console.log("Component unmounting, cleaning up SDK...");
+        nexusSdk.deinit();
+      }
+    };
+  }, [nexusSdk]);
+
+  const contextValue: NexusContextType = useMemo(
+    () => ({
+      nexusSdk,
+      isInitialized,
+      allowanceModal,
+      setAllowanceModal,
+      intentModal,
+      setIntentModal,
+      cleanupSDK,
+      balances,
+      isLoading,
+      error,
+      refreshBalances,
+    }),
+    [
+      nexusSdk,
+      isInitialized,
+      allowanceModal,
+      intentModal,
+      cleanupSDK,
+      balances,
+      isLoading,
+      error,
+      refreshBalances,
+    ]
+  );
 
   return (
-    <NexusContext.Provider
-      value={{
-        sdk,
-        isInitialized,
-        balances,
-        isLoading,
-        error,
-        refreshBalances,
-      }}
-    >
+    <NexusContext.Provider value={contextValue}>
       {children}
     </NexusContext.Provider>
   );
-}
+};
 
-export function useNexus() {
+export const useNexus = () => {
   const context = useContext(NexusContext);
   if (context === undefined) {
     throw new Error("useNexus must be used within a NexusProvider");
   }
   return context;
-}
+};

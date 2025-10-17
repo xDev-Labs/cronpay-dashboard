@@ -18,6 +18,8 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+        connectkit:
+          "bg-background text-black shadow-[var(--ck-connectbutton-box-shadow)] rounded-[var(--ck-connectbutton-border-radius)] hover:bg-[var(--ck-connectbutton-hover-background)] active:shadow-[var(--ck-connectbutton-active-box-shadow)] text-[var(--ck-connectbutton-font-size)]",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
@@ -34,7 +36,7 @@ const buttonVariants = cva(
       size: "default",
     },
   }
-)
+);
 
 function Button({
   className,

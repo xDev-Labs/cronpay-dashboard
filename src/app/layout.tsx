@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { Web3Provider } from "@/components/providers/Web3Provider";
-import { NexusProvider } from "@/components/providers/NexusProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +31,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Web3Provider>
-          <NexusProvider>{children}</NexusProvider>
+        {children}
         </Web3Provider>
         <Toaster />
       </body>
