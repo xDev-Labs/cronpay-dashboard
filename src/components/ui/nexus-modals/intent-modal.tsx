@@ -19,6 +19,7 @@ import { toast } from "sonner";
 interface IntentModalProps {
   intentModal: OnIntentHookData;
   setIntentModal: (modal: OnIntentHookData | null) => void;
+  onComplete?: () => void;
 }
 
 interface IntentSource {
@@ -32,6 +33,7 @@ interface IntentSource {
 const IntentModal: React.FC<IntentModalProps> = ({
   intentModal,
   setIntentModal,
+  onComplete,
 }) => {
   console.log("intentModal", intentModal);
   const { intent, refresh, allow, deny } = intentModal;
@@ -49,6 +51,7 @@ const IntentModal: React.FC<IntentModalProps> = ({
     if (isRefreshing) return;
     allow();
     setIntentModal(null);
+    onComplete?.();
   };
 
   const handleDeny = () => {

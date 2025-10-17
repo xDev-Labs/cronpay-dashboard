@@ -24,11 +24,13 @@ import { useNexus } from "@/components/providers/NexusProvider";
 interface AllowanceModalProps {
   allowanceModal: OnAllowanceHookData | null;
   setAllowanceModal: Dispatch<SetStateAction<OnAllowanceHookData | null>>;
+  onComplete?: () => void;
 }
 
 const AllowanceModal: React.FC<AllowanceModalProps> = ({
   allowanceModal,
   setAllowanceModal,
+  onComplete,
 }) => {
   const { nexusSdk } = useNexus();
   const [selectedAllowances, setSelectedAllowances] = useState<string[]>([]);
@@ -122,6 +124,7 @@ const AllowanceModal: React.FC<AllowanceModalProps> = ({
     console.log("Final processed allowances in modal:", processedAllowances);
     allow(processedAllowances);
     setAllowanceModal(null);
+    onComplete?.();
   };
 
   const handleDeny = () => {
