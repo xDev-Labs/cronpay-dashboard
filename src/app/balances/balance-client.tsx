@@ -5,8 +5,10 @@ import { useAccount } from "wagmi";
 import { useNexus } from "@/components/providers/NexusProvider";
 import { Header } from "@/components/header";
 import { Card, CardContent } from "@/components/ui/card";
-import { Wallet } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Wallet, ArrowRightLeft } from "lucide-react";
 import { UnifiedBalances } from "@/components/ui/unified-balances";
+import { ConsolidateFundsModal } from "@/components/ui/consolidate-funds-modal";
 import { ConnectKitButton } from "connectkit";
 
 interface BalancePageClientProps {
@@ -19,7 +21,8 @@ interface BalancePageClientProps {
 
 export default function BalancePageClient({ user }: BalancePageClientProps) {
   const { isConnected, address, isReconnecting } = useAccount();
-  const { isInitialized, isLoading, refreshBalances } = useNexus();
+  const { isInitialized, isLoading, balances } = useNexus();
+  const [isConsolidateModalOpen, setIsConsolidateModalOpen] = useState(false);
 
   // Consider wallet connected if we have an address, regardless of isConnected flag
   const hasWallet = Boolean(address) || isConnected;
@@ -59,6 +62,9 @@ export default function BalancePageClient({ user }: BalancePageClientProps) {
     isReconnecting,
     isInitialized,
     isLoading,
+    shouldShowConnectPrompt,
+    shouldShowLoading,
+    shouldShowBalances,
   ]);
 
   return (
@@ -83,6 +89,16 @@ export default function BalancePageClient({ user }: BalancePageClientProps) {
               | SDK: {isInitialized ? "Ready" : "Initializing"}
             </p> */}
           </div>
+          {shouldShowBalances && balances && balances.length > 0 && (
+            <Button
+              onClick={() => setIsConsolidateModalOpen(true)}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <ArrowRightLeft className="h-4 w-4" />
+              Consolidate Funds
+            </Button>
+          )}
         </div>
 
         {shouldShowConnectPrompt && (
@@ -125,6 +141,15 @@ export default function BalancePageClient({ user }: BalancePageClientProps) {
               <UnifiedBalances />
             </CardContent>
           </Card>
+        )}
+
+        {/* Consolidate Funds Modal */}
+        {balances && (
+          <ConsolidateFundsModal
+            isOpen={isConsolidateModalOpen}
+            onClose={() => setIsConsolidateModalOpen(false)}
+            availableBalance={balances}
+          />
         )}
       </main>
     </div>

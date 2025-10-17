@@ -1,33 +1,20 @@
 "use client";
 
-import {
-  RefreshCw,
-  Coins,
-  TrendingUp,
-  AlertCircle,
-  ArrowRight,
-} from "lucide-react";
+import { RefreshCw, Coins, TrendingUp, AlertCircle } from "lucide-react";
 import { useNexus } from "../providers/NexusProvider";
 import { ConnectKitButton } from "connectkit";
-import { CHAIN_METADATA, UserAsset } from "@avail-project/nexus-core";
 import { usePathname } from "next/navigation";
 
 export function UnifiedBalances() {
   const pathname = usePathname();
 
+  const { balances, isLoading, isInitialized, error, refreshBalances } =
+    useNexus();
+
   // Only render on balances route
   if (pathname !== "/balances") {
     return null;
   }
-
-  const {
-    balances,
-    isLoading,
-    nexusSdk,
-    isInitialized,
-    error,
-    refreshBalances,
-  } = useNexus();
 
   const formatBalance = (balance: string, decimals: number) => {
     const num = parseFloat(balance);

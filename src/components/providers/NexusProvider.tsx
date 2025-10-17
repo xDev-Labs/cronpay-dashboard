@@ -17,6 +17,7 @@ import React, {
   useCallback,
   SetStateAction,
   Dispatch,
+  useRef,
 } from "react";
 import { useAccount } from "wagmi";
 
@@ -55,12 +56,16 @@ export const NexusProvider: React.FC<NexusProviderProps> = ({
   const [balances, setBalances] = useState<UserAsset[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const isInitializingRef = useRef<boolean>(false);
 
   const { connector } = useAccount();
 
   const initializeSDK = useCallback(async () => {
-    if (isConnected && !nexusSdk && connector) {
+    if (isConnected && !nexusSdk && connector && !isInitializingRef.current) {
       try {
+        isInitializingRef.current = true;
+        console.log("Initializing Nexus SDK...");
+
         // Get the EIP-1193 provider from the connector
         // For ConnectKit/wagmi, we need to get the provider from the connector
         const provider = (await connector.getProvider()) as EthereumProvider;
@@ -81,6 +86,7 @@ export const NexusProvider: React.FC<NexusProviderProps> = ({
         setIsInitialized(true);
 
         sdk.setOnAllowanceHook(async (data: OnAllowanceHookData) => {
+          console.log("SDK: Allowance hook triggered", data);
           // This is a hook for the dev to show user the allowances that need to be setup for the current tx to happen
           // where,
           // sources: an array of objects with minAllowance, chainID, token symbol, etc.
@@ -90,6 +96,7 @@ export const NexusProvider: React.FC<NexusProviderProps> = ({
         });
 
         sdk.setOnIntentHook((data: OnIntentHookData) => {
+          console.log("SDK: Intent hook triggered", data);
           // This is a hook for the dev to show user the intent, the sources and associated fees
           // where,
           // intent: Intent data containing sources and fees for display purpose
@@ -101,6 +108,8 @@ export const NexusProvider: React.FC<NexusProviderProps> = ({
       } catch (error) {
         console.error("Failed to initialize NexusSDK:", error);
         setIsInitialized(false);
+      } finally {
+        isInitializingRef.current = false;
       }
     }
   }, [isConnected, nexusSdk, connector]);
@@ -126,25 +135,29 @@ export const NexusProvider: React.FC<NexusProviderProps> = ({
 
   const cleanupSDK = useCallback(() => {
     if (nexusSdk) {
+      console.log("Cleaning up Nexus SDK...");
       nexusSdk.deinit();
       setNexusSdk(undefined);
       setIsInitialized(false);
       setBalances([]);
       setError(null);
     }
+    isInitializingRef.current = false;
   }, [nexusSdk]);
 
   useEffect(() => {
     if (!isConnected) {
       cleanupSDK();
-    } else {
+    } else if (!nexusSdk && !isInitializingRef.current) {
       initializeSDK();
     }
 
     return () => {
-      cleanupSDK();
+      if (!isConnected) {
+        cleanupSDK();
+      }
     };
-  }, [isConnected, cleanupSDK, initializeSDK]);
+  }, [isConnected]); // Only depend on isConnected to prevent multiple calls
 
   // Auto-fetch balances when SDK is initialized
   useEffect(() => {
@@ -152,6 +165,16 @@ export const NexusProvider: React.FC<NexusProviderProps> = ({
       refreshBalances();
     }
   }, [isInitialized, nexusSdk, refreshBalances]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (nexusSdk) {
+        console.log("Component unmounting, cleaning up SDK...");
+        nexusSdk.deinit();
+      }
+    };
+  }, [nexusSdk]);
 
   const contextValue: NexusContextType = useMemo(
     () => ({
