@@ -14,6 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import logo from "../../public/logo.png"; // @ts-ignore
 
 interface HeaderProps {
   user: {
@@ -46,7 +48,7 @@ export function Header({ user }: HeaderProps) {
         {/* Left: Crown Logo */}
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="CronPay Logo" className="h-6 w-6" />
+            <Image src={logo} priority alt="CronPay Logo" className="rounded-sm h-6 w-6" width={24} height={24} />
             <span className="text-xl font-bold">CronPay</span>
           </Link>
 
@@ -58,11 +60,10 @@ export function Header({ user }: HeaderProps) {
                   key={item.href}
                   href={item.href}
                   target={item.target}
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
-                    pathname === item.href
-                      ? "text-foreground"
-                      : "text-muted-foreground"
-                  }`}
+                  className={`text-sm font-medium transition-colors hover:text-primary ${pathname === item.href
+                    ? "text-foreground"
+                    : "text-muted-foreground"
+                    }`}
                 >
                   {item.label}
                 </Link>
