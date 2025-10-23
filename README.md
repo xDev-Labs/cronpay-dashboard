@@ -4,7 +4,7 @@ A modern blockchain payment tracking and management platform built with Next.js.
 
 ## Overview
 
-CronPay Dashboard is a comprehensive solution for businesses and individuals who need to manage cryptocurrency payments at scale. The platform provides a centralized interface to configure payment endpoints, monitor transaction status, and analyze revenue across different blockchain networks and tokens.
+CronPay Dashboard is a comprehensive solution for businesses and individuals who need to manage cryptocurrency payments at scale. The platform provides a centralized interface to configure payment endpoints, monitor transaction status, and analyze revenue across different blockchain networks and tokens
 
 ## Key Features
 
