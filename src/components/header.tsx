@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Crown, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -31,7 +31,9 @@ export function Header({ user }: HeaderProps) {
     { href: "/keys", label: "API Keys" },
     { href: "/statements", label: "Account Statement" },
     { href: "/balances", label: "Asset Breakdown" },
-    { href: "/docs", label: "Docs" },
+
+    { href: null, label: "Payout Links (Coming Soon)" },
+    { href: "https://docs.cronpay.xyz", label: "Developer Docs", target: "_blank" },
   ];
 
   const handleSignOut = async () => {
@@ -44,24 +46,35 @@ export function Header({ user }: HeaderProps) {
         {/* Left: Crown Logo */}
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
-            <Crown className="h-6 w-6 text-primary" />
+            <img src="/logo.png" alt="CronPay Logo" className="h-6 w-6" />
             <span className="text-xl font-bold">CronPay</span>
           </Link>
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${pathname === item.href
-                    ? "text-foreground"
-                    : "text-muted-foreground"
+            {navItems.map((item) =>
+              item.href ? (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  target={item.target}
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    pathname === item.href
+                      ? "text-foreground"
+                      : "text-muted-foreground"
                   }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <span
+                  key={item.label}
+                  className="text-sm font-medium text-muted-foreground cursor-not-allowed"
+                >
+                  {item.label}
+                </span>
+              )
+            )}
           </nav>
         </div>
 

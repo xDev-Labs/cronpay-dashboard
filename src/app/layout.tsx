@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CronPay",
+  title: "CronPay | Dashboard",
   description: "CronPay | Your Crypto Payments Gateway",
 };
 
