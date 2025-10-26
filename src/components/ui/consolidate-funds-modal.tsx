@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import IntentModal from "./nexus-modals/intent-modal";
 import AllowanceModal from "./nexus-modals/allowance-modal";
 import { useEffect, useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SwapForm } from "./bridge/swap-form";
 
 interface ConsolidateFundsModalProps {
   isOpen: boolean;
@@ -128,19 +130,35 @@ export const ConsolidateFundsModal: React.FC<ConsolidateFundsModalProps> = ({
           <DialogTitle>Consolidate Funds</DialogTitle>
           <DialogDescription>
             Move your assets to consolidate them on a single chain. Select the
-            destination chain and token to conslidate.
+            destination chain and token to consolidate.
           </DialogDescription>
         </DialogHeader>
 
         <div className="mt-4 space-y-6">
-          {/* Show form when not in progress */}
+          {/* Show tabs when not in progress */}
           {status === "idle" && (
-            <BridgeForm
-              isTestnet={true} // You can make this configurable if needed
-              availableBalance={availableBalance}
-              onSubmit={handleSubmit}
-              isSubmitting={isSubmitting}
-            />
+            <Tabs defaultValue="bridge" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="bridge">Bridge</TabsTrigger>
+                <TabsTrigger value="swap">Cross Chain Swap</TabsTrigger>
+              </TabsList>
+              <TabsContent value="bridge">
+                <BridgeForm
+                  isTestnet={true} // You can make this configurable if needed
+                  availableBalance={availableBalance}
+                  onSubmit={handleSubmit}
+                  isSubmitting={isSubmitting}
+                />
+              </TabsContent>
+              <TabsContent value="swap">
+                <SwapForm
+                  isTestnet={true} // You can make this configurable if needed
+                  availableBalance={availableBalance}
+                  onSubmit={handleSubmit}
+                  isSubmitting={isSubmitting}
+                />
+              </TabsContent>
+            </Tabs>
           )}
 
           {/* Show progress when transaction is in progress */}
